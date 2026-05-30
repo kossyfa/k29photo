@@ -193,6 +193,153 @@ def photos_by_tag(tag_name):
     conn.close()
     return render_template('index.html', photos=photos, tag=tag_name)
 
+# Δημιουργία Album
+@app.route('/album/new', methods=['GET', 'POST'])
+def new_album():
+    if 'user_id' not in session:
+        flash('Πρέπει να συνδεθείς πρώτα!', 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        conn = get_db()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO albums (name, owner_id, date_created)
+                VALUES (%s, %s, CURRENT_DATE)
+                RETURNING album_id
+            """, (name, session['user_id']))
+            album_id = cur.fetchone()[0]
+            conn.commit()
+            flash('Το album δημιουργήθηκε!', 'success')
+            return redirect(url_for('view_album', album_id=album_id))
+        except Exception as e:
+            conn.rollback()
+            flash(f'Σφάλμα: {str(e)}', 'error')
+        finally:
+            cur.close()
+            conn.close()
+
+    return render_template('new_album.html')
+
+
+# Προβολή Album
+@app.route('/album/<int:album_id>')
+def view_album(album_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("""
+        SELECT a.album_id, a.name, a.date_created,
+               u.first_name, u.last_name, u.user_id
+        FROM albums a
+        JOIN users u ON a.owner_id = u.user_id
+        WHERE a.album_id = %s
+    """, (album_id,))
+    album = cur.fetchone()
+
+    if album is None:
+        return "Album not found", 404
+
+    cur.execute("""
+        SELECT photo_id, caption FROM photos
+        WHERE album_id = %s
+    """, (album_id,))
+    photos = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return render_template('album.html', album=album, photos=photos)
+
+
+# Upload Photo
+@app.route('/album/<int:album_id>/upload', methods=['GET', 'POST'])
+def upload_photo(album_id):
+    if 'user_id' not in session:
+        flash('Πρέπει να συνδεθείς πρώτα!', 'error')
+        return redirect(url_for('login'))
+
+    # Έλεγχος ότι το album ανήκει στον χρήστη
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT owner_id FROM albums WHERE album_id = %s", (album_id,))
+    album = cur.fetchone()
+
+    if album is None or album['owner_id'] != session['user_id']:
+        flash('Δεν έχεις δικαίωμα!', 'error')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        caption = request.form['caption']
+        tags_input = request.form.get('tags', '').strip()
+        photo_file = request.files['photo']
+        photo_data = photo_file.read()
+
+        try:
+            cur2 = conn.cursor()
+            # Εισαγωγή φωτογραφίας
+            cur2.execute("""
+                INSERT INTO photos (caption, data, album_id)
+                VALUES (%s, %s, %s)
+                RETURNING photo_id
+            """, (caption, psycopg2.Binary(photo_data), album_id))
+            photo_id = cur2.fetchone()[0]
+
+            # Εισαγωγή tags
+            if tags_input:
+                tags_list = [t.strip().lower() for t in tags_input.split(',') if t.strip()]
+                for tag_name in tags_list:
+                    # Βρες ή δημιούργησε το tag
+                    cur2.execute("""
+                        INSERT INTO tags (name) VALUES (%s)
+                        ON CONFLICT (name) DO NOTHING
+                    """, (tag_name,))
+                    cur2.execute("SELECT tag_id FROM tags WHERE name = %s", (tag_name,))
+                    tag_id = cur2.fetchone()[0]
+                    cur2.execute("""
+                        INSERT INTO photo_tags (photo_id, tag_id) VALUES (%s, %s)
+                        ON CONFLICT DO NOTHING
+                    """, (photo_id, tag_id))
+
+            conn.commit()
+            flash('Η φωτογραφία ανέβηκε!', 'success')
+            return redirect(url_for('view_photo', photo_id=photo_id))
+        except Exception as e:
+            conn.rollback()
+            flash(f'Σφάλμα: {str(e)}', 'error')
+        finally:
+            cur.close()
+            conn.close()
+
+    cur.close()
+    conn.close()
+    return render_template('upload_photo.html', album_id=album_id)
+
+
+# Τα Albums μου
+@app.route('/my-albums')
+def my_albums():
+    if 'user_id' not in session:
+        flash('Πρέπει να συνδεθείς πρώτα!', 'error')
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""
+        SELECT a.album_id, a.name, a.date_created,
+               COUNT(p.photo_id) as photo_count
+        FROM albums a
+        LEFT JOIN photos p ON a.album_id = p.album_id
+        WHERE a.owner_id = %s
+        GROUP BY a.album_id
+        ORDER BY a.date_created DESC
+    """, (session['user_id'],))
+    albums = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('my_albums.html', albums=albums)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
