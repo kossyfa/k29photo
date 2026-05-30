@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Αρχική - k29photo{% endblock %}
+
+{% block content %}
+<h2>Όλες οι Φωτογραφίες</h2>
+
+{% if photos %}
+    <div class="photo-grid">
+    {% for photo in photos %}
+        <div class="photo-card">
+            <a href="{{ url_for('view_photo', photo_id=photo['photo_id']) }}">
+                <img src="{{ url_for('serve_photo', photo_id=photo['photo_id']) }}"
+                     alt="{{ photo['caption'] }}">
+            </a>
+            <p>{{ photo['caption'] }}</p>
+            <small>by {{ photo['first_name'] }} {{ photo['last_name'] }}</small>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>Δεν υπάρχουν φωτογραφίες ακόμα.</p>
+{% endif %}
+{% endblock %}

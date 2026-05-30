@@ -1,0 +1,25 @@
+body { font-family: Arial, sans-serif; margin: 0; background: #f0f0f0; }
+nav  { background: #333; padding: 10px 20px; display: flex;
+       justify-content: space-between; align-items: center; }
+nav a { color: white; text-decoration: none; margin-left: 10px; }
+nav a:hover { text-decoration: underline; }
+.container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+.flash { padding: 10px; margin: 10px 0; border-radius: 5px; }
+.flash.success { background: #d4edda; color: #155724; }
+.flash.error   { background: #f8d7da; color: #721c24; }
+.flash.info    { background: #d1ecf1; color: #0c5460; }
+.photo-grid { display: flex; flex-wrap: wrap; gap: 15px; }
+.photo-card { background: white; border-radius: 8px; padding: 10px;
+              width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.photo-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
+input, select, button { display: block; margin: 8px 0; padding: 8px;
+                        width: 300px; border-radius: 4px; border: 1px solid #ccc; }
+button { background: #333; color: white; cursor: pointer; border: none; }
+button:hover { background: #555; }
+.photo-detail img { max-width: 600px; border-radius: 8px; }
+.photo-detail { background: white; padding: 20px; border-radius: 8px; }
+.tag { background: #333; color: white; padding: 3px 8px;
+       border-radius: 12px; margin: 3px; text-decoration: none; font-size: 0.85em; }
+.tag:hover { background: #555; }
+.comment { border-left: 3px solid #333; padding: 8px 12px; margin: 8px 0; background: #f9f9f9; }
+textarea { width: 400px; height: 80px; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }

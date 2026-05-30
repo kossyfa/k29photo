@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Σύνδεση - k29photo{% endblock %}
+
+{% block content %}
+<h2>Σύνδεση</h2>
+<form method="POST" action="/login">
+    <input type="email"    name="email"    placeholder="Email"    required><br>
+    <input type="password" name="password" placeholder="Κωδικός" required><br>
+    <button type="submit">Σύνδεση</button>
+</form>
+<p>Δεν έχεις λογαριασμό; <a href="{{ url_for('register') }}">Εγγραφή</a></p>
+{% endblock %}

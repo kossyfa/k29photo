@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Εγγραφή - k29photo{% endblock %}
+
+{% block content %}
+<h2>Εγγραφή</h2>
+<form method="POST" action="/register">
+    <input type="text"     name="first_name" placeholder="Όνομα"    required><br>
+    <input type="text"     name="last_name"  placeholder="Επίθετο"  required><br>
+    <input type="email"    name="email"      placeholder="Email"     required><br>
+    <input type="password" name="password"   placeholder="Κωδικός"  required><br>
+    <input type="text"     name="hometown"   placeholder="Πόλη"><br>
+    <input type="date"     name="dob"        placeholder="Ημ. Γέννησης"><br>
+    <select name="gender">
+        <option value="">-- Φύλο --</option>
+        <option value="M">Άνδρας</option>
+        <option value="F">Γυναίκα</option>
+        <option value="O">Άλλο</option>
+    </select><br>
+    <button type="submit">Εγγραφή</button>
+</form>
+<p>Έχεις ήδη λογαριασμό; <a href="{{ url_for('login') }}">Σύνδεση</a></p>
+{% endblock %}
