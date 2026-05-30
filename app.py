@@ -174,5 +174,25 @@ def view_photo(photo_id):
                            likes_count=likes_count)
 
 
+# Photos by Tag
+@app.route('/tag/<tag_name>')
+def photos_by_tag(tag_name):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""
+        SELECT p.photo_id, p.caption, u.first_name, u.last_name
+        FROM photos p
+        JOIN photo_tags pt ON p.photo_id = pt.photo_id
+        JOIN tags t ON pt.tag_id = t.tag_id
+        JOIN albums a ON p.album_id = a.album_id
+        JOIN users u ON a.owner_id = u.user_id
+        WHERE t.name = %s
+    """, (tag_name,))
+    photos = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('index.html', photos=photos, tag=tag_name)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
