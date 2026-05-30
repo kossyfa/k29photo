@@ -139,3 +139,4 @@ COMMIT;
 -- Trigger 7: tag με κεφαλαία → auto-lowercase
 -- INSERT INTO tags (name) VALUES ('BEACH');
 -- SELECT * FROM tags WHERE name = 'beach';
+
