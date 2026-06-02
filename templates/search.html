@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Αναζήτηση{% endblock %}
+{% block content %}
+<h2>🔍 Αναζήτηση Φωτογραφιών</h2>
+<form method="GET" action="{{ url_for('search') }}">
+    <input type="text" name="q" value="{{ query }}"
+           placeholder="π.χ. summer sea (AND αναζήτηση με tags)">
+    <button type="submit">Αναζήτηση</button>
+</form>
+
+{% if query %}
+    <p>Αποτελέσματα για: <b>{{ query }}</b> — {{ photos|length }} φωτογραφίες</p>
+    {% if photos %}
+        <div class="photo-grid">
+        {% for photo in photos %}
+            <div class="photo-card">
+                <a href="{{ url_for('view_photo', photo_id=photo['photo_id']) }}">
+                    <img src="{{ url_for('serve_photo', photo_id=photo['photo_id']) }}"
+                         alt="{{ photo['caption'] }}"
+                         onerror="this.src='https://placehold.co/220x180?text=photo'">
+                </a>
+                <div class="photo-card-info">
+                    <p>{{ photo['caption'] }}</p>
+                    <small>by {{ photo['first_name'] }} {{ photo['last_name'] }}</small>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p>Δεν βρέθηκαν φωτογραφίες.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}
