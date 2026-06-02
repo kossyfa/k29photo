@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Upload Φωτογραφίας{% endblock %}
+{% block content %}
+<h2>Ανέβασε Φωτογραφία</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="text" name="caption" placeholder="Λεζάντα" required><br>
+    <input type="text" name="tags"
+           placeholder="Tags (χωρισμένα με κόμμα π.χ. summer,sea,travel)"><br>
+    <input type="file" name="photo" accept="image/*" required><br>
+    <button type="submit">Ανέβασμα</button>
+</form>
+{% endblock %}
