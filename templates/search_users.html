@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Αναζήτηση Χρηστών{% endblock %}
+{% block content %}
+
+<h2>🔍 Αναζήτηση Χρηστών</h2>
+<form method="GET">
+    <input type="text" name="q" value="{{ query }}" placeholder="Όνομα, επίθετο ή email...">
+    <button type="submit">Αναζήτηση</button>
+</form>
+
+{% if query %}
+    <p style="margin-top:15px;">Αποτελέσματα για: <b>{{ query }}</b> — {{ results|length }} χρήστες</p>
+    {% if results %}
+        <div class="photo-grid" style="margin-top:10px;">
+        {% for u in results %}
+            <a href="{{ url_for('profile', user_id=u['user_id']) }}" class="album-card">
+                <h3>{{ u['first_name'] }} {{ u['last_name'] }}</h3>
+                <p>📍 {{ u['hometown'] or 'Άγνωστη πόλη' }}</p>
+                {% if session.user_id and session.user_id != u['user_id'] %}
+                    <span class="btn" style="font-size:0.8em; padding:4px 10px;">Προβολή Προφίλ</span>
+                {% endif %}
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p>Δεν βρέθηκαν χρήστες.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

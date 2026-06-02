@@ -11,20 +11,26 @@
     <a href="{{ url_for('index') }}" class="logo">📷 k29photo</a>
     <div class="nav-links">
         <a href="{{ url_for('index') }}">Αρχική</a>
-        <a href="{{ url_for('popular_tags') }}">Δημοφιλή Tags</a>
-        <a href="{{ url_for('top_users') }}">Top Χρήστες</a>
+        <a href="{{ url_for('popular_tags') }}">🏷️ Tags</a>
+        <a href="{{ url_for('top_users') }}">🏆 Top</a>
         <a href="{{ url_for('search') }}">🔍 Αναζήτηση</a>
+        <a href="{{ url_for('search_comments') }}">💬 Σχόλια</a>
+        <a href="{{ url_for('search_users') }}">👥 Χρήστες</a>
     </div>
     <div class="nav-user">
         {% if session.user_id %}
-            <a href="{{ url_for('new_album') }}">+ Νέο Album</a>
-            <a href="{{ url_for('my_albums') }}">Τα Albums μου</a>
+            <a href="{{ url_for('new_album') }}">+ Album</a>
+            <a href="{{ url_for('my_albums') }}">Albums</a>
             <a href="{{ url_for('profile', user_id=session.user_id) }}">👤 {{ session.user_name }}</a>
-            <a href="{{ url_for('logout') }}">Αποσύνδεση</a>
+            <a href="{{ url_for('logout') }}">Έξοδος</a>
         {% else %}
             <a href="{{ url_for('login') }}">Σύνδεση</a>
             <a href="{{ url_for('register') }}">Εγγραφή</a>
         {% endif %}
+        <button onclick="toggleDark()" id="dark-toggle"
+                style="background:rgba(255,255,255,0.2); border:none; color:white;
+                       padding:6px 12px; border-radius:4px; cursor:pointer;
+                       font-size:0.95em; margin-left:8px;">🌙</button>
     </div>
 </nav>
 
@@ -39,6 +45,25 @@
 
     {% block content %}{% endblock %}
 </div>
+
+<footer>
+    © 2026 k29photo · Εργασία K29 · ΕΚΠΑ Τμήμα Πληροφορικής & Τηλεπικοινωνιών
+</footer>
+
+<script>
+    // Φόρτωσε preference από localStorage
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark');
+        document.getElementById('dark-toggle').textContent = '☀️';
+    }
+
+    function toggleDark() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        localStorage.setItem('darkMode', isDark);
+        document.getElementById('dark-toggle').textContent = isDark ? '☀️' : '🌙';
+    }
+</script>
 
 </body>
 </html>

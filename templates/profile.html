@@ -9,21 +9,91 @@
         <p>⭐ Contribution Score: <b>{{ score }}</b></p>
         <p>📧 {{ user['email'] }}</p>
     </div>
-    {% if session.user_id == user['user_id'] %}
-        <a href="{{ url_for('new_album') }}" class="btn">+ Νέο Album</a>
-    {% else %}
-        <a href="{{ url_for('add_friend', friend_id=user['user_id']) }}" class="btn">+ Προσθήκη Φίλου</a>
-    {% endif %}
+    <div>
+        {% if session.user_id == user['user_id'] %}
+            <a href="{{ url_for('new_album') }}" class="btn">+ Νέο Album</a>
+            <a href="{{ url_for('user_friends', user_id=user['user_id']) }}" class="btn">👥 Φίλοι</a>
+        {% elif session.user_id %}
+            {% if is_friend %}
+                <span class="btn" style="background:#28a745;">✓ Φίλοι</span>
+            {% else %}
+                <a href="{{ url_for('add_friend', friend_id=user['user_id']) }}" class="btn">+ Προσθήκη Φίλου</a>
+            {% endif %}
+            <a href="{{ url_for('user_friends', user_id=user['user_id']) }}" class="btn">👥 Φίλοι</a>
+        {% endif %}
+    </div>
 </div>
 
-<h3>Albums ({{ albums|length }})</h3>
-<div class="photo-grid">
-{% for album in albums %}
-    <a href="{{ url_for('view_album', album_id=album['album_id']) }}" class="album-card">
-        <h3>{{ album['name'] }}</h3>
-        <p>{{ album['photo_count'] }} φωτογραφίες</p>
-        <small>{{ album['date_created'] }}</small>
-    </a>
-{% endfor %}
+<!-- Albums -->
+<h3>📁 Albums ({{ albums|length }})</h3>
+{% if albums %}
+    <div class="photo-grid">
+    {% for album in albums %}
+        <div class="photo-card" style="position:relative;">
+            <a href="{{ url_for('view_album', album_id=album['album_id']) }}">
+                {% if album['cover_photo_id'] %}
+                    <img src="{{ url_for('serve_photo', photo_id=album['cover_photo_id']) }}"
+                         alt="{{ album['name'] }}"
+                         onerror="this.src='https://placehold.co/220x180?text=Album'">
+                {% else %}
+                    <img src="https://placehold.co/220x180?text=Κενό+Album"
+                         alt="{{ album['name'] }}">
+                {% endif %}
+            </a>
+            <div class="photo-card-info">
+                <p>{{ album['name'] }}</p>
+                <small>{{ album['photo_count'] }} φωτογραφίες · {{ album['date_created'] }}</small>
+            </div>
+            {% if session.user_id == user['user_id'] %}
+            <form method="POST" action="{{ url_for('delete_album', album_id=album['album_id']) }}"
+                  onsubmit="return confirm('Διαγραφή album;')">
+                <button type="submit" class="btn btn-danger"
+                        style="width:100%; font-size:0.8em; border-radius:0 0 8px 8px;">🗑 Διαγραφή</button>
+            </form>
+            {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>Δεν υπάρχουν albums.</p>
+{% endif %}
+
+<!-- Friend Recommendations -->
+{% if recommendations %}
+<div style="margin-top:30px;">
+    <h3>👥 Προτάσεις Φίλων</h3>
+    <div class="photo-grid">
+    {% for r in recommendations %}
+        <a href="{{ url_for('profile', user_id=r['user_id']) }}" class="album-card">
+            <h3>{{ r['first_name'] }} {{ r['last_name'] }}</h3>
+            <small>{{ r['common'] }} κοινοί φίλοι</small>
+        </a>
+    {% endfor %}
+    </div>
 </div>
+{% endif %}
+
+<!-- You May Also Like -->
+{% if may_also_like %}
+<div style="margin-top:30px;">
+    <h3>✨ You May Also Like</h3>
+    <div class="photo-grid">
+    {% for photo in may_also_like %}
+        <div class="photo-card">
+            <a href="{{ url_for('view_photo', photo_id=photo['photo_id']) }}">
+                <img src="{{ url_for('serve_photo', photo_id=photo['photo_id']) }}"
+                     alt="{{ photo['caption'] }}"
+                     onerror="this.src='https://placehold.co/220x180?text=photo'">
+            </a>
+            <div class="photo-card-info">
+                <p>{{ photo['caption'] }}</p>
+                <small>by {{ photo['first_name'] }} {{ photo['last_name'] }}</small>
+                <small>{{ photo['match_count'] }} κοινά tags</small>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

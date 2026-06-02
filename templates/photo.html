@@ -2,50 +2,99 @@
 {% block title %}{{ photo['caption'] }} - k29photo{% endblock %}
 
 {% block content %}
-<a href="{{ url_for('index') }}">← Πίσω</a>
+<a href="{{ url_for('view_album', album_id=photo['album_id']) }}">← Πίσω στο Album</a>
 
-<div class="photo-detail">
+<div class="photo-detail" style="margin-top:15px;">
     <img src="{{ url_for('serve_photo', photo_id=photo['photo_id']) }}"
-         alt="{{ photo['caption'] }}">
+         alt="{{ photo['caption'] }}"
+         onerror="this.src='https://placehold.co/600x400?text=photo'">
 
     <h2>{{ photo['caption'] }}</h2>
-    <p>by <b>{{ photo['first_name'] }} {{ photo['last_name'] }}</b></p>
+    <p>by <a href="{{ url_for('profile', user_id=photo['owner_id']) }}">
+        <b>{{ photo['first_name'] }} {{ photo['last_name'] }}</b></a>
+    </p>
 
     <!-- Tags -->
-    <div class="tags">
+    <div class="tags" style="margin:15px 0;">
         {% for tag in tags %}
-            <a href="{{ url_for('photos_by_tag', tag_name=tag['name']) }}"
-               class="tag">{{ tag['name'] }}</a>
+            <a href="{{ url_for('photos_by_tag', tag_name=tag['name']) }}" class="tag">
+                {{ tag['name'] }}
+            </a>
         {% endfor %}
     </div>
-    
 
     <!-- Likes -->
-    <p>❤️ {{ likes_count }} likes</p>
-    {% if session.user_id %}
-        <form method="POST" action="{{ url_for('like_photo', photo_id=photo['photo_id']) }}">
-            <button type="submit">❤️ Like</button>
+    <div style="margin:15px 0;">
+        <p>❤️ <b>{{ likes_count }}</b> likes
+            {% if likers %}
+                —
+                {% for l in likers %}
+                    <a href="{{ url_for('profile', user_id=l['user_id']) }}">
+                        {{ l['first_name'] }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            {% endif %}
+        </p>
+        {% if session.user_id and session.user_id != photo['owner_id'] %}
+            {% if not user_liked %}
+                <form method="POST"
+                      action="{{ url_for('like_photo', photo_id=photo['photo_id']) }}"
+                      style="display:inline;">
+                    <button type="submit" class="btn">❤️ Like</button>
+                </form>
+            {% else %}
+                <span class="btn" style="background:#28a745;">✓ Liked</span>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Διαγραφή (μόνο ο owner) -->
+    {% if session.user_id == photo['owner_id'] %}
+        <form method="POST"
+              action="{{ url_for('delete_photo', photo_id=photo['photo_id']) }}"
+              onsubmit="return confirm('Διαγραφή φωτογραφίας;')">
+            <button type="submit" class="btn btn-danger">🗑 Διαγραφή Φωτογραφίας</button>
         </form>
     {% endif %}
 
+    <hr style="margin:20px 0;">
+
     <!-- Comments -->
-    <h3>Σχόλια</h3>
+    <h3>💬 Σχόλια ({{ comments|length }})</h3>
     {% for c in comments %}
         <div class="comment">
-            <b>{{ c['first_name'] }} {{ c['last_name'] }}</b>
-            <small>{{ c['post_date'].strftime('%d/%m/%Y %H:%M') }}</small>
-            <p>{{ c['text'] }}</p>
+            {% if c['owner_id'] %}
+                <b><a href="{{ url_for('profile', user_id=c['owner_id']) }}"
+                      style="text-decoration:none; color:#0063dc;">
+                    {{ c['first_name'] }} {{ c['last_name'] }}
+                </a></b>
+            {% else %}
+                <b>👤 Επισκέπτης</b>
+            {% endif %}
+            <small style="color:#888; margin-left:10px;">
+                {{ c['post_date'].strftime('%d/%m/%Y %H:%M') }}
+            </small>
+            <p style="margin-top:5px;">{{ c['text'] }}</p>
         </div>
+    {% else %}
+        <p>Δεν υπάρχουν σχόλια ακόμα.</p>
     {% endfor %}
 
-    <!-- Post Comment -->
-    <h4>Άφησε σχόλιο</h4>
-    <form method="POST" action="{{ url_for('post_comment', photo_id=photo['photo_id']) }}">
-        <textarea name="text" placeholder="Γράψε σχόλιο..." required></textarea><br>
-        {% if not session.user_id %}
-            <small>Σχολιάζεις ως επισκέπτης</small>
-        {% endif %}
-        <button type="submit">Δημοσίευση</button>
-    </form>
+    <!-- Post Comment - για ΟΛΟΥΣ εκτός από τον owner -->
+    {% if not session.user_id or session.user_id != photo['owner_id'] %}
+        <h4 style="margin-top:20px;">Άφησε σχόλιο</h4>
+        <form method="POST"
+              action="{{ url_for('post_comment', photo_id=photo['photo_id']) }}">
+            <textarea name="text" placeholder="Γράψε σχόλιο..." required
+                      style="width:100%; max-width:500px; height:80px; padding:8px;
+                             border-radius:6px; border:1px solid #ddd;"></textarea><br>
+            {% if not session.user_id %}
+                <small style="color:#888;">
+                    Σχολιάζεις ως <b>Επισκέπτης</b> —
+                    <a href="{{ url_for('login') }}">Σύνδεση</a> για να εμφανίζεται το όνομά σου
+                </small><br>
+            {% endif %}
+            <button type="submit" class="btn" style="margin-top:8px;">Δημοσίευση</button>
+        </form>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Tag: {{ tag }}{% endblock %}
+{% block content %}
+
+<h2>🏷️ Tag: {{ tag }}</h2>
+
+{% if session.user_id %}
+<div style="margin: 10px 0;">
+    {% if view_mine == '1' %}
+        <a href="{{ url_for('photos_by_tag', tag_name=tag) }}" class="btn">🌍 Όλες οι Φωτογραφίες</a>
+    {% else %}
+        <a href="{{ url_for('photos_by_tag', tag_name=tag, mine=1) }}" class="btn">👤 Οι Δικές μου</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if photos %}
+    <div class="photo-grid">
+    {% for photo in photos %}
+        <div class="photo-card">
+            <a href="{{ url_for('view_photo', photo_id=photo['photo_id']) }}">
+                <img src="{{ url_for('serve_photo', photo_id=photo['photo_id']) }}"
+                     alt="{{ photo['caption'] }}"
+                     onerror="this.src='https://placehold.co/220x180?text=photo'">
+            </a>
+            <div class="photo-card-info">
+                <p>{{ photo['caption'] }}</p>
+                <small>by {{ photo['first_name'] }} {{ photo['last_name'] }}</small>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>Δεν βρέθηκαν φωτογραφίες με το tag <b>{{ tag }}</b>.</p>
+{% endif %}
+{% endblock %}
