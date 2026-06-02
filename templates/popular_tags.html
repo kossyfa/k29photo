@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Δημοφιλή Tags{% endblock %}
+{% block content %}
+<h2>🏷️ Δημοφιλή Tags</h2>
+<div style="margin-top:20px;">
+{% for tag in tags %}
+    <a href="{{ url_for('photos_by_tag', tag_name=tag['name']) }}" class="tag"
+       style="font-size: {{ 0.8 + tag['cnt'] * 0.1 }}em; padding: 6px 14px;">
+        {{ tag['name'] }} ({{ tag['cnt'] }})
+    </a>
+{% endfor %}
+</div>
+{% endblock %}
