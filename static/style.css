@@ -1,26 +1,138 @@
-body { font-family: Arial, sans-serif; margin: 0; background: #f0f0f0; }
-nav  { background: #333; padding: 10px 20px; display: flex;
-       justify-content: space-between; align-items: center; }
-nav a { color: white; text-decoration: none; margin-left: 10px; }
-nav a:hover { text-decoration: underline; }
-.container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
-.flash { padding: 10px; margin: 10px 0; border-radius: 5px; }
-.flash.success { background: #d4edda; color: #155724; }
-.flash.error   { background: #f8d7da; color: #721c24; }
-.flash.info    { background: #d1ecf1; color: #0c5460; }
-.photo-grid { display: flex; flex-wrap: wrap; gap: 15px; }
-.photo-card { background: white; border-radius: 8px; padding: 10px;
-              width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.photo-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
-input, select, button { display: block; margin: 8px 0; padding: 8px;
-                        width: 300px; border-radius: 4px; border: 1px solid #ccc; }
-button { background: #333; color: white; cursor: pointer; border: none; }
-button:hover { background: #555; }
-.photo-detail img { max-width: 600px; border-radius: 8px; }
-.photo-detail { background: white; padding: 20px; border-radius: 8px; }
-.tag { background: #333; color: white; padding: 3px 8px;
-       border-radius: 12px; margin: 3px; text-decoration: none; font-size: 0.85em; }
-.tag:hover { background: #555; }
-.comment { border-left: 3px solid #333; padding: 8px 12px; margin: 8px 0; background: #f9f9f9; }
-textarea { width: 400px; height: 80px; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
+body {
+    font-family: 'Arial', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+}
+
+/* ── Navigation ── */
+nav {
+    background: #0063dc;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+nav a { color: white; text-decoration: none; margin: 0 8px; font-size: 0.95em; }
+nav a:hover { text-decoration: underline; }
+.logo { font-size: 1.3em; font-weight: bold; }
+.nav-links a, .nav-user a {
+    background: rgba(255,255,255,0.15);
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+.nav-links a:hover, .nav-user a:hover { background: rgba(255,255,255,0.3); }
+
+/* ── Container ── */
+.container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
+
+/* ── Flash messages ── */
+.flash { padding: 12px; margin: 10px 0; border-radius: 6px; }
+.flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.flash.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.flash.info    { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+/* ── Photo Grid ── */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+.photo-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+.photo-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+.photo-card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+.photo-card-info { padding: 10px; }
+.photo-card-info p { font-weight: bold; font-size: 0.9em; margin-bottom: 4px; }
+.photo-card-info small { color: #888; font-size: 0.8em; }
+
+/* ── Photo Detail ── */
+.photo-detail { background: white; border-radius: 8px; padding: 24px; }
+.photo-detail img { max-width: 100%; max-height: 500px; object-fit: contain;
+                    display: block; margin: 0 auto 20px; border-radius: 6px; }
+
+/* ── Tags ── */
+.tags { margin: 10px 0; }
+.tag {
+    display: inline-block;
+    background: #0063dc;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin: 3px;
+    text-decoration: none;
+    font-size: 0.82em;
+}
+.tag:hover { background: #004aaa; }
+
+/* ── Comments ── */
+.comment {
+    border-left: 3px solid #0063dc;
+    padding: 10px 14px;
+    margin: 10px 0;
+    background: #f9f9f9;
+    border-radius: 0 6px 6px 0;
+}
+
+/* ── Forms ── */
+input[type=text], input[type=email], input[type=password],
+input[type=date], select, textarea {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95em;
+}
+input[type=file] { margin: 8px 0; }
+button, .btn {
+    background: #0063dc;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    text-decoration: none;
+    display: inline-block;
+    margin: 6px 4px;
+}
+button:hover, .btn:hover { background: #004aaa; }
+.btn-danger { background: #dc3545; }
+.btn-danger:hover { background: #b02a37; }
+
+/* ── Profile ── */
+.profile-header {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ── Albums grid ── */
+.album-card {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: #333;
+    display: block;
+}
+.album-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+.album-card h3 { color: #0063dc; margin-bottom: 8px; }
