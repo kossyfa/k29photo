@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Τα Albums μου{% endblock %}
+{% block content %}
+<h2>Τα Albums μου</h2>
+<a href="{{ url_for('new_album') }}"><button>+ Νέο Album</button></a>
+
+{% if albums %}
+    <div class="photo-grid">
+    {% for album in albums %}
+        <div class="photo-card">
+            <a href="{{ url_for('view_album', album_id=album['album_id']) }}">
+                <h3>{{ album['name'] }}</h3>
+            </a>
+            <p>{{ album['photo_count'] }} φωτογραφίες</p>
+            <small>{{ album['date_created'] }}</small>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>Δεν έχεις albums ακόμα.</p>
+{% endif %}
+{% endblock %}
