@@ -340,6 +340,120 @@ def my_albums():
     conn.close()
     return render_template('my_albums.html', albums=albums)
 
+# Profile
+@app.route('/user/<int:user_id>')
+def profile(user_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    user = cur.fetchone()
+    if user is None:
+        return "User not found", 404
+
+    cur.execute("""
+        SELECT a.album_id, a.name, a.date_created,
+               COUNT(p.photo_id) as photo_count
+        FROM albums a
+        LEFT JOIN photos p ON a.album_id = p.album_id
+        WHERE a.owner_id = %s
+        GROUP BY a.album_id
+        ORDER BY a.date_created DESC
+    """, (user_id,))
+    albums = cur.fetchall()
+
+    # Contribution score
+    cur.execute("""
+        SELECT
+            (SELECT COUNT(*) FROM photos p JOIN albums a ON p.album_id=a.album_id
+             WHERE a.owner_id = %s) +
+            (SELECT COUNT(*) FROM comments c
+             JOIN photos p ON c.photo_id=p.photo_id
+             JOIN albums a ON p.album_id=a.album_id
+             WHERE c.owner_id = %s AND a.owner_id != %s)
+        AS score
+    """, (user_id, user_id, user_id))
+    score = cur.fetchone()['score']
+
+    cur.close()
+    conn.close()
+    return render_template('profile.html', user=user, albums=albums, score=score)
+
+
+# Top 10 Users
+@app.route('/top-users')
+def top_users():
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""
+        SELECT u.user_id, u.first_name, u.last_name,
+            (SELECT COUNT(*) FROM photos p JOIN albums a ON p.album_id=a.album_id
+             WHERE a.owner_id = u.user_id) +
+            (SELECT COUNT(*) FROM comments c
+             JOIN photos p ON c.photo_id=p.photo_id
+             JOIN albums a ON p.album_id=a.album_id
+             WHERE c.owner_id = u.user_id AND a.owner_id != u.user_id)
+        AS score
+        FROM users u
+        ORDER BY score DESC
+        LIMIT 10
+    """)
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('top_users.html', users=users)
+
+
+# Popular Tags
+@app.route('/tags')
+def popular_tags():
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""
+        SELECT t.name, COUNT(pt.photo_id) as cnt
+        FROM tags t
+        JOIN photo_tags pt ON t.tag_id = pt.tag_id
+        GROUP BY t.name
+        ORDER BY cnt DESC
+        LIMIT 20
+    """)
+    tags = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('popular_tags.html', tags=tags)
+
+
+# Search
+@app.route('/search')
+def search():
+    query = request.args.get('q', '').strip()
+    photos = []
+
+    if query:
+        tag_list = query.lower().split()
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # AND query: φωτογραφίες που έχουν ΟΛΑ τα tags
+        cur.execute("""
+            SELECT p.photo_id, p.caption, u.first_name, u.last_name
+            FROM photos p
+            JOIN albums a ON p.album_id = a.album_id
+            JOIN users u ON a.owner_id = u.user_id
+            WHERE p.photo_id IN (
+                SELECT pt.photo_id
+                FROM photo_tags pt
+                JOIN tags t ON pt.tag_id = t.tag_id
+                WHERE t.name = ANY(%s)
+                GROUP BY pt.photo_id
+                HAVING COUNT(DISTINCT t.name) = %s
+            )
+        """, (tag_list, len(tag_list)))
+        photos = cur.fetchall()
+        cur.close()
+        conn.close()
+
+    return render_template('search.html', photos=photos, query=query)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
