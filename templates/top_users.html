@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Top Χρήστες{% endblock %}
+{% block content %}
+<h2>🏆 Top 10 Χρήστες</h2>
+<table style="width:100%; background:white; border-radius:8px; padding:16px;">
+    <tr style="background:#0063dc; color:white;">
+        <th style="padding:10px;">#</th>
+        <th>Όνομα</th>
+        <th>Score</th>
+    </tr>
+    {% for u in users %}
+    <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:10px; text-align:center;">{{ loop.index }}</td>
+        <td><a href="{{ url_for('profile', user_id=u['user_id']) }}">
+            {{ u['first_name'] }} {{ u['last_name'] }}</a></td>
+        <td style="text-align:center;"><b>{{ u['score'] }}</b></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
