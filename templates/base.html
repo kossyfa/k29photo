@@ -7,23 +7,28 @@
 </head>
 <body>
 
-    
 <nav>
-    <a href="{{ url_for('index') }}">🏠 k29photo</a>
-    <span>
+    <a href="{{ url_for('index') }}" class="logo">📷 k29photo</a>
+    <div class="nav-links">
+        <a href="{{ url_for('index') }}">Αρχική</a>
+        <a href="{{ url_for('popular_tags') }}">Δημοφιλή Tags</a>
+        <a href="{{ url_for('top_users') }}">Top Χρήστες</a>
+        <a href="{{ url_for('search') }}">🔍 Αναζήτηση</a>
+    </div>
+    <div class="nav-user">
         {% if session.user_id %}
-            Γεια, <b>{{ session.user_name }}</b>!
+            <a href="{{ url_for('new_album') }}">+ Νέο Album</a>
+            <a href="{{ url_for('my_albums') }}">Τα Albums μου</a>
+            <a href="{{ url_for('profile', user_id=session.user_id) }}">👤 {{ session.user_name }}</a>
             <a href="{{ url_for('logout') }}">Αποσύνδεση</a>
         {% else %}
             <a href="{{ url_for('login') }}">Σύνδεση</a>
             <a href="{{ url_for('register') }}">Εγγραφή</a>
-            <a href="{{ url_for('my_albums') }}">Τα Albums μου</a>
         {% endif %}
-    </span>
+    </div>
 </nav>
 
 <div class="container">
-    <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
