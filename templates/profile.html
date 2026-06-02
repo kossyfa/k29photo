@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ user['first_name'] }} {{ user['last_name'] }}{% endblock %}
+{% block content %}
+
+<div class="profile-header">
+    <div>
+        <h2>{{ user['first_name'] }} {{ user['last_name'] }}</h2>
+        <p>📍 {{ user['hometown'] or 'Άγνωστη πόλη' }}</p>
+        <p>⭐ Contribution Score: <b>{{ score }}</b></p>
+        <p>📧 {{ user['email'] }}</p>
+    </div>
+    {% if session.user_id == user['user_id'] %}
+        <a href="{{ url_for('new_album') }}" class="btn">+ Νέο Album</a>
+    {% else %}
+        <a href="{{ url_for('add_friend', friend_id=user['user_id']) }}" class="btn">+ Προσθήκη Φίλου</a>
+    {% endif %}
+</div>
+
+<h3>Albums ({{ albums|length }})</h3>
+<div class="photo-grid">
+{% for album in albums %}
+    <a href="{{ url_for('view_album', album_id=album['album_id']) }}" class="album-card">
+        <h3>{{ album['name'] }}</h3>
+        <p>{{ album['photo_count'] }} φωτογραφίες</p>
+        <small>{{ album['date_created'] }}</small>
+    </a>
+{% endfor %}
+</div>
+{% endblock %}
