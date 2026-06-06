@@ -4,7 +4,7 @@
 
 ---
 
-Η παρούσα εργασία περιγράφει τον σχεδιασμό και την υλοποίηση του k29photo, μιας διαδικτυακής πλατφόρμας κοινοποίησης φωτογραφιών εμπνευσμένης από το Flickr. Η εφαρμογή υλοποιήθηκε με χρήση **PostgreSQL** για τη διαχείριση της βάσης δεδομένων και **Flask** (Python 3) για το backend της διαδικτυακής εφαρμογής.
+Η παρούσα εργασία περιγράφει τον σχεδιασμό και την υλοποίηση του k29photo, μιας διαδικτυακής πλατφόρμας κοινοποίησης φωτογραφιών εμπνευσμένης από το Flickr. Η εφαρμογή υλοποιήθηκε με χρήση PostgreSQL για τη διαχείριση της βάσης δεδομένων και Flask (Python 3) για το backend της διαδικτυακής εφαρμογής.
 
 ---
 
@@ -15,19 +15,19 @@
 Το E/R διάγραμμα του συστήματος περιλαμβάνει τις εξής οντότητες και συσχετίσεις:
 
 **Οντότητες:**
-- User - Χρήστης της πλατφόρμας
-- Album - Άλμπουμ φωτογραφιών
-- Photo - Φωτογραφία
-- Tag - Ετικέτα κατηγοριοποίησης φωτογραφιών
-- Comment - Σχόλιο σε φωτογραφία
+- User: Χρήστης της πλατφόρμας
+- Album: Άλμπουμ φωτογραφιών
+- Photo: Φωτογραφία
+- Tag: Ετικέτα κατηγοριοποίησης φωτογραφιών
+- Comment: Σχόλιο σε φωτογραφία
 
 **Συσχετίσεις:**
-- User **owns** Album (1:N)
-- Album **contains** Photo (1:N)
-- Photo **tagged_with** Tag (M:N)
-- User **comments_on** Photo (M:N, μέσω Comments)
-- User **likes** Photo (M:N)
-- User **friends_with** User (M:N, αυτο-αναφορική)
+- User `owns` Album (1:N)
+- Album `contains` Photo (1:N)
+- Photo `tagged_with` Tag (M:N)
+- User `comments_on` Photo (M:N, μέσω Comments)
+- User `likes` Photo (M:N)
+- User `friends_with` User (M:N, αυτο-αναφορική)
 
 *(Βλ. αρχείο er-diagram.mwb / er-diagram.png)*
 
@@ -168,22 +168,84 @@ GROUP BY u.user_id ORDER BY common DESC
 
 ## Παραδοχές
 
-1. **Αμφίδρομη Φιλία:** Επιλέχθηκε αμφίδρομο μοντέλο φιλίας (όταν Α προσθέτει Β, η φιλία ισχύει και αντίστροφα). Αποθηκεύεται ένα ζεύγος με `user_id1 < user_id2` για αποφυγή διπλότυπων.
+1. Αμφίδρομη Φιλία: Επιλέχθηκε αμφίδρομο μοντέλο φιλίας (όταν Α προσθέτει Β, η φιλία ισχύει και αντίστροφα). Αποθηκεύεται ένα ζεύγος με `user_id1 < user_id2` για αποφυγή διπλότυπων.
 
-2. **Guest Comments:** Η εκφώνηση επιτρέπει σχόλια από επισκέπτες. Αυτό υλοποιήθηκε με nullable `owner_id` στον πίνακα `comments` και ενημέρωση του αντίστοιχου trigger.
+2. Guest Comments: Η εκφώνηση επιτρέπει σχόλια από επισκέπτες. Αυτό υλοποιήθηκε με nullable `owner_id` στον πίνακα `comments` και ενημέρωση του αντίστοιχου trigger.
 
-3. **Δημόσιες Φωτογραφίες:** Όλες οι φωτογραφίες και τα άλμπουμ είναι δημόσια.
+3. Δημόσιες Φωτογραφίες: Όλες οι φωτογραφίες και τα άλμπουμ είναι δημόσια.
 
-4. **Αποθήκευση Εικόνων:** Τα δυαδικά δεδομένα αποθηκεύονται ως `BYTEA` στην PostgreSQL.
+4. Αποθήκευση Εικόνων: Τα δυαδικά δεδομένα αποθηκεύονται ως `BYTEA` στην PostgreSQL.
 
-5. **Authentication:** Η σύνδεση χρηστών υλοποιείται με απλή επαλήθευση email/password μέσω SQL query και Flask sessions, χωρίς χρήση επιπλέον βιβλιοθηκών (π.χ. flask_login).
+5. Authentication: Η σύνδεση χρηστών υλοποιείται με απλή επαλήθευση email/password μέσω SQL query και Flask sessions, χωρίς χρήση επιπλέον βιβλιοθηκών (π.χ. flask_login).
 
-6. **Contribution Score:** Μετράει φωτογραφίες που ανέβασε ο χρήστης συν σχόλια σε φωτογραφίες άλλων χρηστών. Το score ενημερώνεται δυναμικά, όταν διαγράφεται φωτογραφία ή σχόλιο, το score μειώνεται αυτόματα.
+6. Contribution Score: Μετράει φωτογραφίες που ανέβασε ο χρήστης συν σχόλια σε φωτογραφίες άλλων χρηστών. Το score ενημερώνεται δυναμικά, όταν διαγράφεται φωτογραφία ή σχόλιο, το score μειώνεται αυτόματα.
 
 ---
 
 ## Παρατηρήσεις & Πιθανές Παραλείψεις
 
-- **Password Hashing:** Οι κωδικοί αποθηκεύονται ως plaintext για λόγους απλότητας. Σε production περιβάλλον θα χρησιμοποιούνταν bcrypt ή παρόμοια βιβλιοθήκη.
-- **Pagination:** Δεν υλοποιήθηκε σελιδοποίηση για μεγάλο αριθμό φωτογραφιών.
-- **Image Optimization:** Δεν γίνεται resize/compression των εικόνων κατά το upload.
+- Password Hashing: Οι κωδικοί αποθηκεύονται ως plaintext για λόγους απλότητας. Σε production περιβάλλον θα χρησιμοποιούνταν bcrypt ή παρόμοια βιβλιοθήκη.
+- Pagination: Δεν υλοποιήθηκε σελιδοποίηση για μεγάλο αριθμό φωτογραφιών.
+- Image Optimization: Δεν γίνεται resize/compression των εικόνων κατά το upload.
+
+
+## Πηγαίος Κώδικας
+
+Ο κώδικας είναι διαθέσιμος στο GitHub:  
+```
+https://github.com/kossyfa/k29photo
+```
+
+---
+
+## How to run the app
+
+### 1. Κλωνοποίηση Repository
+```bash
+git clone https://github.com/kossyfa/k29photo.git
+cd k29photo
+```
+
+### 2. Δημιουργία Virtual Environment
+```bash
+python3 -m venv myvirenv
+source myvirenv/bin/activate
+pip install -r requirements.txt
+```
+
+### 3. Δημιουργία Βάσης Δεδομένων
+```bash
+# Σύνδεση ως postgres admin
+sudo -i -u postgres psql
+
+# Μέσα στο psql:
+CREATE USER k29 WITH PASSWORD '1234';
+CREATE DATABASE k29photo WITH OWNER k29;
+GRANT ALL PRIVILEGES ON DATABASE k29photo TO k29;
+\q
+```
+
+### 4. Δημιουργία Πινάκων & Triggers
+```bash
+psql -U k29 -d k29photo -h localhost -a -f schema.sql
+```
+
+### 5. Φόρτωση Δεδομένων
+```bash
+# Επιλογή 1 (προτεινόμενη): Με πραγματικές εικόνες (εικόνες στο images/)
+python3 load_data.py
+
+# Επιλογή 2: Χωρίς εικόνες
+psql -U k29 -d k29photo -h localhost -a -f sample_data.sql
+```
+
+### 6. Εκκίνηση Εφαρμογής
+```bash
+source myvirenv/bin/activate
+python3 app.py
+```
+
+### 7. Άνοιξε στον Browser
+```
+http://127.0.0.1:5000
+```
