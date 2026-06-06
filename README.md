@@ -4,17 +4,17 @@
 ## Δομή Project
 
 ### Φάση Ι - Σχεδιασμός Βάσης Δεδομένων
-- `schema.sql`      — Δημιουργία πινάκων και constraints/triggers
-- `sample_data.sql` — Sample δεδομένα χωρίς εικόνες
-- `er-diagram.mwb`  — E/R Διάγραμμα (MySQL Workbench)
+- `schema.sql`      - Δημιουργία πινάκων και constraints/triggers
+- `sample_data.sql` - Sample δεδομένα χωρίς εικόνες
+- `er-diagram.mwb`  - E/R Διάγραμμα (MySQL Workbench)
 
 ### Φάση ΙΙ - Υλοποίηση Εφαρμογής
-- `app.py`          — Flask εφαρμογή (routes, SQL queries)
-- `load_data.py`    — Φόρτωση πραγματικών δεδομένων με εικόνες
-- `templates/`      — HTML templates (Jinja2)
-- `static/`         — CSS (style.css)
-- `images/`         — Εικόνες για το load_data.py
-- `requirements.txt`— Python dependencies
+- `app.py`          - Flask εφαρμογή (routes, SQL queries)
+- `load_data.py`    - Φόρτωση πραγματικών δεδομένων με εικόνες
+- `templates/`      - HTML templates (Jinja2)
+- `static/`         - CSS (style.css)
+- `images/`         - Εικόνες για το load_data.py
+- `requirements.txt`- Python dependencies
 
 ## Εκτέλεση
 
