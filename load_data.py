@@ -95,7 +95,11 @@ LIKES = [
 ]
 
 def load_image(filename):
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+    # Ψάξε πρώτα στον φάκελο images/
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images', filename)
+    if not os.path.exists(path):
+        # Fallback: ψάξε στον ίδιο φάκελο
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
     if not os.path.exists(path):
         print(f"  ⚠️  Δεν βρέθηκε: {filename}")
         return None

@@ -2,3 +2,6 @@ myvirenv/
 __pycache__/
 *.pyc
 .env
+
+echo "images/*.jpg" >> ~/k29photo/.gitignore
+echo "images/*.png" >> ~/k29photo/.gitignore
