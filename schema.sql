@@ -1,10 +1,16 @@
+-- =====================================================
+-- k29photo Database Schema
+-- Κ29: Σχεδιασμός και Χρήση Βάσεων Δεδομένων
+-- ΕΚΠΑ Τμήμα Πληροφορικής & Τηλ/νιών
+-- =====================================================
+
 -- 1. Users
 CREATE TABLE users (
-    user_id   SERIAL PRIMARY KEY,
+    user_id    SERIAL PRIMARY KEY,
     first_name VARCHAR(50)  NOT NULL,
     last_name  VARCHAR(50)  NOT NULL,
     email      VARCHAR(100) NOT NULL UNIQUE,
-    dob        DATE,                          -- προαιρετικό
+    dob        DATE,                        -- προαιρετικό
     hometown   VARCHAR(100),
     gender     CHAR(1) CHECK (gender IN ('M','F','O')),
     password   VARCHAR(255) NOT NULL
@@ -15,7 +21,7 @@ CREATE TABLE friends (
     user_id1 INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     user_id2 INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id1, user_id2),
-    CHECK (user_id1 < user_id2)   -- αποτρέπει (A,B) και (B,A) μαζί
+    CHECK (user_id1 < user_id2)             -- αποτρέπει (A,B) και (B,A) μαζί
 );
 
 -- 3. Albums
@@ -28,18 +34,18 @@ CREATE TABLE albums (
 
 -- 4. Photos
 CREATE TABLE photos (
-    photo_id  SERIAL PRIMARY KEY,
-    caption   VARCHAR(255),
-    data      BYTEA NOT NULL,              -- δυαδικά δεδομένα εικόνας
-    album_id  INT NOT NULL REFERENCES albums(album_id) ON DELETE CASCADE
+    photo_id SERIAL PRIMARY KEY,
+    caption  VARCHAR(255),
+    data     BYTEA NOT NULL,                -- δυαδικά δεδομένα εικόνας
+    album_id INT NOT NULL REFERENCES albums(album_id) ON DELETE CASCADE
 );
 
 -- 5. Tags
 CREATE TABLE tags (
-    tag_id  SERIAL PRIMARY KEY,
-    name    VARCHAR(100) NOT NULL UNIQUE,
-    CHECK (name = LOWER(name)),            -- πάντα lowercase
-    CHECK (name NOT LIKE '% %')            -- χωρίς κενά
+    tag_id SERIAL PRIMARY KEY,
+    name   VARCHAR(100) NOT NULL UNIQUE,
+    CHECK (name = LOWER(name)),             -- πάντα lowercase
+    CHECK (name NOT LIKE '% %')             -- χωρίς κενά
 );
 
 -- 6. Photo_Tags (M:N μεταξύ photos και tags)
@@ -50,26 +56,34 @@ CREATE TABLE photo_tags (
 );
 
 -- 7. Comments
+-- owner_id είναι NULL για guest σχόλια (επισκέπτες χωρίς λογαριασμό)
 CREATE TABLE comments (
     comment_id SERIAL PRIMARY KEY,
     text       TEXT NOT NULL,
-    owner_id   INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    owner_id   INT REFERENCES users(user_id) ON DELETE CASCADE,  -- NULL για guests
     photo_id   INT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
     post_date  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 8. Likes (M:N μεταξύ users και photos)
 CREATE TABLE likes (
-    user_id  INT NOT NULL REFERENCES users(user_id)  ON DELETE CASCADE,
+    user_id  INT NOT NULL REFERENCES users(user_id)   ON DELETE CASCADE,
     photo_id INT NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, photo_id)
 );
 
--- Trigger 1: user cannot comment on their own photos
+-- =====================================================
+-- TRIGGERS
+-- =====================================================
+
+-- Trigger 1: Χρήστης δεν μπορεί να σχολιάσει τη δική του φωτογραφία
+-- (NULL owner_id = guest, επιτρέπεται)
 CREATE OR REPLACE FUNCTION check_comment_owner()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Βρες τον owner της φωτογραφίας μέσω του album
+    IF NEW.owner_id IS NULL THEN
+        RETURN NEW;
+    END IF;
     IF NEW.owner_id = (
         SELECT a.owner_id
         FROM photos p
@@ -87,8 +101,7 @@ BEFORE INSERT ON comments
 FOR EACH ROW
 EXECUTE FUNCTION check_comment_owner();
 
-
--- Trigger 2: user cannot like their own photos
+-- Trigger 2: Χρήστης δεν μπορεί να κάνει like στη δική του φωτογραφία
 CREATE OR REPLACE FUNCTION check_like_owner()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -109,7 +122,7 @@ BEFORE INSERT ON likes
 FOR EACH ROW
 EXECUTE FUNCTION check_like_owner();
 
--- Trigger 3: user cannot add themselves as friend
+-- Trigger 3: Χρήστης δεν μπορεί να προσθέσει τον εαυτό του ως φίλο
 CREATE OR REPLACE FUNCTION check_self_friend()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -125,7 +138,7 @@ BEFORE INSERT ON friends
 FOR EACH ROW
 EXECUTE FUNCTION check_self_friend();
 
--- Trigger 4: user cannot add friend that already exists
+-- Trigger 4: Δεν επιτρέπεται διπλή φιλία
 CREATE OR REPLACE FUNCTION check_duplicate_friend()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -145,7 +158,7 @@ BEFORE INSERT ON friends
 FOR EACH ROW
 EXECUTE FUNCTION check_duplicate_friend();
 
--- Trigger 5: ownership check
+-- Trigger 5: Έλεγχος ύπαρξης album κατά την εισαγωγή φωτογραφίας
 CREATE OR REPLACE FUNCTION check_photo_album_owner()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -167,7 +180,7 @@ BEFORE INSERT ON photos
 FOR EACH ROW
 EXECUTE FUNCTION check_photo_album_owner();
 
--- Trigger 6: user cannot like a photo more than once
+-- Trigger 6: Δεν επιτρέπεται διπλό like
 CREATE OR REPLACE FUNCTION check_duplicate_like()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -186,7 +199,7 @@ BEFORE INSERT ON likes
 FOR EACH ROW
 EXECUTE FUNCTION check_duplicate_like();
 
--- Trigger 7: auto-lowercase and validation of the tag
+-- Trigger 7: Auto-lowercase και validation του tag name
 CREATE OR REPLACE FUNCTION normalize_tag_name()
 RETURNS TRIGGER AS $$
 BEGIN
