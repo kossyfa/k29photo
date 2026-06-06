@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Script για φόρτωση πραγματικών δεδομένων στη βάση k29photo.
-Τρέξε: python3 load_data.py
+python3 load_data.py
+Οι εικόνες πρέπει να βρίσκονται στον φάκελο images/
 """
 import psycopg2
 import psycopg2.extras
@@ -14,37 +15,37 @@ DB_USER = "k29"
 DB_PASS = "1234"
 
 PHOTOS = [
-    # ── Ταξίδια & Φύση / Sunset ───────────────────────────
-    ("ee34121259b43d903170780038534a36.jpg", "Camping στα βουνά",         ["nature", "mountain", "camping", "sunset", "travel"]),  # 0
-    ("e40a426209230407eaeae494ef08b966.jpg", "Ηλιοβασίλεμα στη θάλασσα", ["sunset", "sea", "nature", "travel"]),                  # 1
-    ("e2b9ac405a22ee82426f393cce7d5f21.jpg", "Road trip sunset",          ["sunset", "travel", "roadtrip", "car"]),               # 2
-    ("c44498ba48f2d1b5a8c595969310bb7f.jpg", "Πτήση στα σύννεφα",         ["travel", "airplane", "sunset", "sky"]),               # 3
-    ("b1a9caaa3a48add4613f8d6d99beef8c.jpg", "Photography moment",        ["photography", "nature", "travel", "sunset"]),         # 4
-    ("a2b35fb6518e7ddee49f79aa0a9bb54c.jpg", "Road trip με χάρτη",        ["travel", "roadtrip", "friends", "adventure"]),        # 5
-    # ── City Life / Music ─────────────────────────────────
-    ("8f623a0f09a688ddb23cf6c25d982a36.jpg", "Metro rush",                ["city", "travel", "night", "urban"]),                  # 6
-    ("8dd303ff743b4ec47472355cc40fe34c.jpg", "City crossing",             ["city", "urban", "travel", "people"]),                 # 7
-    ("b5c64ff75a7529ae109bc090c95e4f2d.jpg", "Concert night",             ["music", "concert", "friends", "night"]),              # 8
-    # ── Animals ───────────────────────────────────────────
-    ("d57684689ab2f16e3f88bd9a4afa9b80.jpg", "Γάτα στο φως",              ["cat", "animals", "golden", "aesthetic"]),             # 9
-    ("9e4e947760f49201d8e37488a20e3c7f.jpg", "Γάτα σκιά",                 ["cat", "animals", "aesthetic", "cozy"]),               # 10
-    # ── City Vibes ────────────────────────────────────────
-    ("de0834fd2c3e31f5ec904287919e2c45.jpg", "Iced coffee downtown",      ["coffee", "city", "aesthetic", "urban"]),              # 11
-    ("0bdc86bfe7fc6b979c90febdb61ec1f6.jpg", "Work & coffee",             ["coffee", "city", "work", "aesthetic"]),               # 12
-    # ── Study & Coffee ────────────────────────────────────
-    ("093486d4577ed4c308099830860b9a36.jpg", "Study session outdoors",    ["study", "aesthetic", "nature", "coffee"]),            # 13
-    ("85abc424cedba4b907d7ffffcaad125b.jpg", "Cozy workspace",            ["aesthetic", "study", "cozy", "interior"]),            # 14
-    ("74c1fd8750593f2e85366bdd0e17b08a.jpg", "Study cafe vibes",          ["study", "coffee", "aesthetic", "city"]),              # 15
+    # Ταξίδια & Φύση / Sunset
+    ("mountain-camping.jpg", "Camping στα βουνά",         ["nature", "mountain", "camping", "sunset", "travel"]),  
+    ("sunset.jpg",           "Ηλιοβασίλεμα στη θάλασσα", ["sunset", "sea", "nature", "travel"]),                  
+    ("car-sunset.jpg",       "Road trip sunset",          ["sunset", "travel", "roadtrip", "car"]),               
+    ("airplane.jpg",         "Πτήση στα σύννεφα",         ["travel", "airplane", "sunset", "sky"]),               
+    ("photography.jpg",      "Photography moment",        ["photography", "nature", "travel", "sunset"]),         
+    ("road-trip.jpg",        "Road trip με χάρτη",        ["travel", "roadtrip", "friends", "adventure"]),        
+    # City Life / Music
+    ("metro.jpg",            "Metro rush",                ["city", "travel", "night", "urban"]),                  
+    ("city-people.jpg",      "City crossing",             ["city", "urban", "travel", "people"]),                 
+    ("concert.jpg",          "Concert night",             ["music", "concert", "friends", "night"]),              
+    # Animals
+    ("cat.jpg",              "Γάτα στο φως",              ["cat", "animals", "golden", "aesthetic"]),            
+    ("cat-shadow.jpg",       "Γάτα σκιά",                 ["cat", "animals", "aesthetic", "cozy"]),               
+    # City Vibes
+    ("iced-coffee.jpg",      "Iced coffee downtown",      ["coffee", "city", "aesthetic", "urban"]),              
+    ("work-coffee.jpg",      "Work & coffee",             ["coffee", "city", "work", "aesthetic"]),               
+    # Study & Coffee
+    ("study-outdoors.jpg",   "Study session outdoors",    ["study", "aesthetic", "nature", "coffee"]),            
+    ("workspace.jpg",        "Cozy workspace",            ["aesthetic", "study", "cozy", "interior"]),            
+    ("study-coffee.jpg",     "Study cafe vibes",          ["study", "coffee", "aesthetic", "city"]),              
 ]
 
 # Users: (first_name, last_name, email, password, hometown, gender)
 USERS = [
-    ("Θεοδώρα", "Παπαδοπούλου", "papadopoulou@uoa.gr",  "pass1", "Αθήνα",       "F"),
-    ("Νίκος",   "Αντωνίου",     "antoniou@uoa.gr",      "pass2", "Θεσσαλονίκη", "M"),
-    ("Μαρία",   "Γεωργίου",     "georgiou@uoa.gr",      "pass3", "Πάτρα",       "F"),
-    ("Κώστας",  "Δημητρίου",    "dimitriou@uoa.gr",     "pass4", "Ηράκλειο",    "M"),
-    ("Ελένη",   "Παπαγεωργίου", "papageorgiou@uoa.gr",  "pass5", "Βόλος",       "F"),
-    ("Γιώργος", "Κωνσταντίνου", "konstantinou@uoa.gr",  "pass6", "Αθήνα",       "M"),
+    ("Θεοδώρα", "Κόσσυφα",       "kossyfatheo@uoa.gr",  "pass1", "Αθήνα",         "F"),
+    ("Νίκος",   "Αντωνίου",      "antoniounik@uoa.gr",      "pass2", "Θεσσαλονίκη",   "M"),
+    ("Μαρία",   "Γεωργίου",      "georgioum@uoa.gr",      "pass3", "Πάτρα",         "F"),
+    ("Κώστας",  "Δημητρίου",     "dimitriouk@uoa.gr",     "pass4", "Ηράκλειο",      "M"),
+    ("Ελένη",   "Παπαγεωργίου",  "elenipapageorgiou@uoa.gr",  "pass5", "Βόλος",         "F"),
+    ("Γιώργος", "Κωνσταντίνου",  "konstantinou@uoa.gr",  "pass6", "Αθήνα",         "M"),
 ]
 
 # Albums: (name, owner_index, photo_indices)
@@ -56,7 +57,7 @@ ALBUMS = [
     ("Animals",           2, [9, 10]),           # Μαρία
     ("City Vibes",        2, [11, 12]),          # Μαρία
     ("Study & Coffee",    3, [13, 14, 15]),      # Κώστας
-    ("Road Adventures",   4, [5]),               # Ελένη - road trip
+    ("Road Adventures",   4, [5]),               # Ελένη
 ]
 
 # Friends: (user_index1, user_index2)
@@ -73,7 +74,7 @@ COMMENTS = [
     (2, 3,  "Θέλω να ταξιδέψω τώρα!"),
     (4, 2,  "Road trip goals!"),
     (1, 13, "Study inspo!"),
-    (0, 6,  "Αγαπημένη γειτονιά!"),
+    (0, 6,  "Woww!"),
     (3, 9,  "Πόσο όμορφη γάτα!"),
     (5, 10, "Aesthetic vibes 🧡"),
     (0, 7,  "Shibuya crossing!"),
@@ -95,13 +96,13 @@ LIKES = [
 ]
 
 def load_image(filename):
-    # Ψάξε πρώτα στον φάκελο images/
+    # Ψάξε στον φάκελο images/
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images', filename)
     if not os.path.exists(path):
         # Fallback: ψάξε στον ίδιο φάκελο
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
     if not os.path.exists(path):
-        print(f"  ⚠️  Δεν βρέθηκε: {filename}")
+        print(f"Δεν βρέθηκε: {filename}")
         return None
     with open(path, 'rb') as f:
         return f.read()
@@ -117,8 +118,8 @@ def main():
     cur.execute("TRUNCATE TABLE likes, comments, photo_tags, photos, tags, albums, friends, users RESTART IDENTITY CASCADE")
     conn.commit()
 
-    # ── Users ──────────────────────────────────────────────
-    print("👤 Εισαγωγή users...")
+    # Users
+    print("Εισαγωγή users...")
     user_ids = []
     for fn, ln, email, pw, hometown, gender in USERS:
         cur.execute("""
@@ -127,19 +128,19 @@ def main():
         """, (fn, ln, email, pw, hometown, gender))
         user_ids.append(cur.fetchone()[0])
     conn.commit()
-    print(f"  ✅ {len(user_ids)} users")
+    print(f"{len(user_ids)} users")
 
-    # ── Friends ────────────────────────────────────────────
-    print("👥 Εισαγωγή friendships...")
+    # Friends
+    print("Εισαγωγή friendships...")
     for i, j in FRIENDSHIPS:
         id1 = min(user_ids[i], user_ids[j])
         id2 = max(user_ids[i], user_ids[j])
         cur.execute("INSERT INTO friends (user_id1, user_id2) VALUES (%s,%s) ON CONFLICT DO NOTHING", (id1, id2))
     conn.commit()
-    print(f"  ✅ {len(FRIENDSHIPS)} friendships")
+    print(f"{len(FRIENDSHIPS)} friendships")
 
-    # ── Albums + Photos ────────────────────────────────────
-    print("📁 Εισαγωγή albums και φωτογραφιών...")
+    # Albums + Photos
+    print("Εισαγωγή albums και φωτογραφιών...")
     photo_ids = [None] * len(PHOTOS)
 
     for album_name, owner_idx, photo_indices in ALBUMS:
@@ -149,10 +150,9 @@ def main():
             VALUES (%s,%s,CURRENT_DATE) RETURNING album_id
         """, (album_name, owner_id))
         album_id = cur.fetchone()[0]
-        print(f"  📁 Album '{album_name}' (owner: {USERS[owner_idx][0]})")
+        print(f"Album '{album_name}' (owner: {USERS[owner_idx][0]} {USERS[owner_idx][1]})")
 
         for photo_idx in photo_indices:
-            # Αν έχει ήδη photo_id σε αυτό το index, παράλειψε
             if photo_ids[photo_idx] is not None:
                 print(f"    ⏭  Παράλειψη duplicate photo index {photo_idx}")
                 continue
@@ -180,10 +180,10 @@ def main():
 
     conn.commit()
     loaded = sum(1 for pid in photo_ids if pid is not None)
-    print(f"  ✅ {loaded} φωτογραφίες")
+    print(f"{loaded} φωτογραφίες")
 
-    # ── Comments ───────────────────────────────────────────
-    print("💬 Εισαγωγή comments...")
+    # Comments
+    print("Εισαγωγή comments...")
     count = 0
     for commenter_idx, photo_idx, text in COMMENTS:
         if photo_ids[photo_idx] is None:
@@ -197,11 +197,11 @@ def main():
             count += 1
         except Exception as e:
             conn.rollback()
-            print(f"  ⚠️  Comment skip: {e}")
-    print(f"  ✅ {count} comments")
+            print(f"Comment skip: {e}")
+    print(f"{count} comments")
 
-    # ── Likes ──────────────────────────────────────────────
-    print("❤️  Εισαγωγή likes...")
+    # Likes
+    print("Εισαγωγή likes...")
     count = 0
     for user_idx, photo_idx in LIKES:
         if photo_ids[photo_idx] is None:
@@ -213,12 +213,12 @@ def main():
             count += 1
         except Exception as e:
             conn.rollback()
-            print(f"  ⚠️  Like skip: {e}")
-    print(f"  ✅ {count} likes")
+            print(f"Like skip: {e}")
+    print(f"{count} likes")
 
     cur.close()
     conn.close()
-    print("\n🎉 Έτοιμο! Τρέξε python3 app.py και άνοιξε http://127.0.0.1:5000")
+    print("\nΈτοιμο! Τρέξε python3 app.py και άνοιξε http://127.0.0.1:5000")
 
 if __name__ == '__main__':
     main()
